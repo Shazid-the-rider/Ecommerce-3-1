@@ -9,7 +9,7 @@ export default function useHeaderHooks(setView) {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isCategoryOpen, setIsCategoryOpen] = useState(false);
     const {user}=useContext(AuthContext);
-    const { action, setAction, isSignInOpen, setIsSignIn, cartItems, wishlistProducts, wishlistIds,searchText, setSearchText,setWishlistProducts,setCartItems,setWishlistIds,setLikes } = useContext(GlobalApi);//----------------variable extract--------------//
+    const { action, setAction, isSignInOpen, setIsSignIn, cartItems, wishlistProducts, wishlistIds,searchText, setSearchText,setWishlistProducts,setCartItems,setWishlistIds,setLikes,currentUserInfo, setCurrentUserInfo } = useContext(GlobalApi);//----------------variable extract--------------//
 
     const [toast, setToast] = useState({ show: false, message: "", type: "" }); //------------- "error" or "success"----------//
 
@@ -152,7 +152,7 @@ export default function useHeaderHooks(setView) {
         isMenuOpen, setIsMenuOpen, isCategoryOpen, setIsCategoryOpen, isSignInOpen, setIsSignIn, action, setAction,
         toast, setToast, name, setName, password, setPassword, cpassword, setCPassword, email, setEmail, showToast,
         handleSignup, handleNavClick, navLinks, cartItems, wishlistProducts, wishlistIds,handleLogin,user,searchText, setSearchText,
-        setWishlistProducts,setCartItems,setWishlistIds,setLikes
+        setWishlistProducts,setCartItems,setWishlistIds,setLikes,currentUserInfo, setCurrentUserInfo
     }
 
 }

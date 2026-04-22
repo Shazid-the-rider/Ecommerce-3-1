@@ -19,7 +19,7 @@ const WishlistPage = ({ setView, handleProductClick }) => {
         </p>
         <button
           onClick={() => setView("home")}
-          className="bg-[#3BB77E] text-white px-8 py-3 rounded-full font-bold flex items-center gap-2 mx-auto"
+          className="bg-[black] text-white px-8 py-3 rounded-full font-bold flex items-center gap-2 mx-auto"
         >
           <ArrowLeft size={18} /> Go Shopping
         </button>

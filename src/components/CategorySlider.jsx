@@ -27,7 +27,7 @@ const CategorySlider = () => {
             <button className="category-prev w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-[#F2F3F4] text-[#7E7E7E] hover:bg-[#3BB77E] hover:text-white transition-all duration-300 shadow-sm">
               <ChevronLeft size={22} />
             </button>
-            
+
             {/*----------------------- Right Button: Gray -> Green on Hover---------------------*/}
 
             <button className="category-next w-8 h-8 lg:w-10 lg:h-10 flex items-center justify-center rounded-full bg-[#F2F3F4] text-[#7E7E7E] hover:bg-[#3BB77E] hover:text-white transition-all duration-300 shadow-sm">
@@ -46,10 +46,10 @@ const CategorySlider = () => {
             prevEl: ".category-prev",
           }}
           breakpoints={{
-            0: { slidesPerView: 3 }, 
+            0: { slidesPerView: 3 },
             480: { slidesPerView: 5 },
             768: { slidesPerView: 7 },
-            1024: { slidesPerView: 10 },
+            1024: { slidesPerView: 8 },
           }}
           className="!overflow-visible"
         >

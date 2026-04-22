@@ -2,9 +2,9 @@ import { useContext } from "react";
 import { GlobalApi } from "../context/GlobalContext";
 
 export default function usePopularProductHooks(){
-  const {products,toast, setToast,showToast}=useContext(GlobalApi);
+  const {products,toast, setToast,showToast,selectedProductG,setSelectedProductG}=useContext(GlobalApi);
   const popularProducts = products.filter((product) => product.isPopular);
   return{
-    products,popularProducts,toast, setToast,showToast
+    products,popularProducts,toast, setToast,showToast,selectedProductG,setSelectedProductG
   }
 }

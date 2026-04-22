@@ -10,8 +10,10 @@ import {
 import { GlobalApi } from "../context/GlobalContext";
 import { change_quantity, deleteCart } from "../../service/firebaseCrudOperation";
 import { span } from "framer-motion/client";
+import { AuthContext } from "../context/Authprovider";
 
 const CartPage = ({ setView, handleProductClick, }) => {
+  const {user}= useContext(AuthContext)
   const { cartItems } = useContext(GlobalApi)
   const subtotals = cartItems.reduce((acc, item) => {
     return acc + item.price * item.qty;
@@ -131,7 +133,7 @@ const CartPage = ({ setView, handleProductClick, }) => {
                 <div className="sm: text-red-500 flex items-center justify-end gap-4 font-bold text-[20px]">
                   ${(item.price * item.qty).toFixed(2)}
                   <button
-                    onClick={() => deleteCart(item.cid)}
+                    onClick={() => deleteCart(item.cid,user.uid)}
                     className="text-gray-300 hover:text-red-500 transition-colors"
                   >
                     <Trash2 size={18} />

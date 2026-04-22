@@ -7,7 +7,7 @@ export default function useProductDetailHooks(product) {
 
     const [qty, setQty] = useState(1); //---------------select quantity----------------//
     const { user } = useContext(AuthContext);
-    const { cartItems, likes, setLikes, setIsSignIn,toast, setToast,showToast, } = useContext(GlobalApi);
+    const { cartItems, likes, setLikes, setIsSignIn,toast, setToast,showToast,comment,setComment } = useContext(GlobalApi);
 
     //--------------------Toast message-------------------//
 
@@ -28,6 +28,6 @@ export default function useProductDetailHooks(product) {
     const isLiked = likes.includes(user?.uid);
 
     return {
-        qty, setQty, user, cartItems, likes, setLikes, toast, setToast, showToast, isInCart, isLiked, setIsSignIn,toast, setToast,showToast,
+        qty, setQty, user, cartItems, likes, setLikes, toast, setToast,comment,setComment, showToast, isInCart, isLiked, setIsSignIn,toast, setToast,showToast,
     }
 }

@@ -22,21 +22,7 @@ const App = () => {
         currentView={currentView}
         user={user}
       />
-      {
-        filteredProducts.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
 
-            {filteredProducts.map((product, index) => (
-              <ProductCard
-                key={product.id.toString() + index.toString()}
-                product={product}
-                handleProductClick={handleProductClick}
-              />
-            ))}
-
-          </div>
-        )
-      }
       <div className="grow bg-[#F4F6FA]">
         {currentView === "home" ? (
           <main className="bg-white">
@@ -46,6 +32,27 @@ const App = () => {
               handleProductClick={handleProductClick}
             />
           </main>
+        ) : currentView === "search" ? (   // 👈 ADD THIS BLOCK
+          <div className="p-5">
+            <h2 className="text-xl font-semibold mb-4">Search Results</h2>
+
+            {filteredProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+                {filteredProducts.map((product, index) => (
+                  <ProductCard
+                    key={product.id.toString() + index.toString()}
+                    product={product}
+                    handleProductClick={handleProductClick}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="flex justify-center items-center py-20">
+                <p className="font-semibold">No products found</p>
+              </div>
+            )}
+          </div>
+
         ) : currentView === 'checkout' ? (
           <CheckoutPage
             setView={setCurrentView}

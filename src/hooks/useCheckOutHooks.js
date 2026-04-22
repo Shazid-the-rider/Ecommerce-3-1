@@ -1,10 +1,13 @@
 import { useContext, useState } from "react";
 import { AuthContext } from "../context/Authprovider";
 import { GlobalApi } from "../context/GlobalContext";
+import { addDoc, collection, doc, increment, serverTimestamp, updateDoc } from "firebase/firestore";
+import { db } from "../../service/firebaseConfig";
+import { remove_Cart_Of_user } from "../../service/firebaseCrudOperation";
 
 export default function useCheckOutHooks(setView) {
     const { user } = useContext(AuthContext);
-    const { cartItems, setCartItems } = useContext(GlobalApi);
+    const { cartItems, setCartItems ,setToast,showToast,toast} = useContext(GlobalApi);
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [address, setAddress] = useState("");
@@ -32,6 +35,7 @@ export default function useCheckOutHooks(setView) {
         if (!firstName.trim() || !lastName.trim() || !city.trim() || !zipCode.trim() || !address.trim() || !email.trim() || !validateEmail(email.trim())) {
             return;
         }
+        const userRef = doc(db, "USERS", user?.uid);
         const info = {
             firstName: firstName,
             lastName: lastName,
@@ -46,15 +50,19 @@ export default function useCheckOutHooks(setView) {
         const orderRef = collection(db, 'ORDER');
         const placeRef = await addDoc(orderRef, info);
         const finalRef = doc(db, 'ORDER', placeRef.id);
+        await updateDoc(userRef, { order: increment(cartItems.length) });
         await updateDoc(finalRef, { orderPlaceID: placeRef.id });
-        console.log('product place successfull');
+        showToast('Successfully Order Placed ✅', 'success')
+
         setCartItems([]);
         remove_Cart_Of_user(user?.uid);
-        setView()
+        setTimeout(()=>{
+             setView("home")
+        },4000)
         window.scrollTo(0, 0);
     };
     return {
         user, cartItems, setCartItems, firstName, setFirstName, lastName, setLastName, address, setAddress, city, setCity, zipCode, setZipCode,
-        email, setEmail, subtotals, shipping, tax, total, handlePlaceOrder,
+        email, setEmail, subtotals, shipping, tax, total, handlePlaceOrder,setToast,showToast,toast
     }
 }

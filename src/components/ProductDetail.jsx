@@ -2,9 +2,10 @@ import { ShoppingCart, Heart, Star, ArrowLeft, Minus, Plus, ShieldCheck, Truck }
 import { add_To_Cart, add_to_wishlist } from "../../service/firebaseCrudOperation";
 import { AnimatePresence, motion } from "framer-motion";
 import useProductDetailHooks from "../hooks/useProductDetailHooks";
+import Comment from "./Comment";
 
 const ProductDetail = ({ product, setView, }) => {
-  const { qty, setQty, user, toast, showToast, setToast, isInCart, isLiked, setIsSignIn } = useProductDetailHooks(product)
+  const { qty, setQty, user, toast, showToast, setToast, isInCart, isLiked, setIsSignIn,comment,setComment } = useProductDetailHooks(product)
   return (
     <div className="container mx-auto px-4 py-2 font-[poppins] relative">
 
@@ -183,16 +184,16 @@ const ProductDetail = ({ product, setView, }) => {
                 exit={{ opacity: 0, y: 0 }}
                 transition={{ duration: 0.3 }}
                 className={`
-                  fixed left-1/2 transform -translate-x-1/2 
-                  bottom-4 w-[90%] text-center
-                  lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2 lg:w-auto
-                  border-gray-200
-                  text-[16px] lg:text-[20px] font-semibold
-                  px-5 py-4 lg:px-20 lg:py-20
-                  rounded-lg shadow-2xl shadow-[black]/30 z-[999]
-
-                  ${toast.type === "success" ? "bg-green-100 text-black" : "bg-red-100 text-black"}
-      `}
+                       fixed left-1/2 transform -translate-x-1/2 
+                       bottom-4 w-[90%] text-center
+                       lg:left-1/2 lg:bottom-0 lg:-translate-x-1/2 lg:w-full
+                       border-gray-200
+                       text-[16px] lg:text-[15px] font-semibold
+                       px-5 py-4 lg:px-20 lg:py-3
+                       rounded-lg shadow-2xl shadow-[black]/30 z-[999]
+     
+                       ${toast.type === "success" ? "bg-green-100 text-black" : "bg-red-100 text-black"}
+           `}
               >
                 {toast.message}
               </motion.div>
@@ -200,6 +201,7 @@ const ProductDetail = ({ product, setView, }) => {
           </AnimatePresence>
         </div>
       </div>
+      <Comment comment={comment}/>
     </div>
   );
 };

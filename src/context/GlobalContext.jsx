@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, } from "react";
 import { AuthContext } from "./Authprovider";
-import { fetch_products, getWishlistProducts, listen_To_Cart, listen_User_Wishlist } from "../../service/firebaseCrudOperation";
+import { Fetch_Comment, fetch_products, getWishlistProducts, listen_Current_User, listen_To_Cart, listen_User_Wishlist } from "../../service/firebaseCrudOperation";
 
 export const GlobalApi = createContext();
 
@@ -17,24 +17,47 @@ export default function GlobalContext({ children }) {
     const [wishlistProducts, setWishlistProducts] = useState([]);
     const { user } = useContext(AuthContext);
     const [products, setProducts] = useState([]);
+    const [selectedProductG, setSelectedProductG] = useState();
     const [currentView, setCurrentView] = useState("home");
-
+    const [comment, setComment] = useState([]);
+    const [currentUserInfo, setCurrentUserInfo] = useState();
     const [searchText, setSearchText] = useState(""); //-----------------------------searching product ------------------//
     const [filteredProducts, setFilteredProducts] = useState([]); //----------------product filtering------------------//
+
+    //------------Current User Info---------//
+
+    useEffect(() => {
+        if (!user?.uid) {
+            setCurrentUserInfo(null);
+            return;
+        }
+        const unsubscribe = listen_Current_User(user.uid, setCurrentUserInfo);
+        return () => unsubscribe();
+    }, [user]);
+
+    //------------Comment-------------------//
+
+    useEffect(() => {
+        if (!selectedProductG?.id) return;
+        const unsubscribe = Fetch_Comment(setComment, selectedProductG.id);
+        return unsubscribe
+    }, [selectedProductG])
 
     //------------continuous product change ------------//
 
     useEffect(() => {
         if (searchText.trim().length === 0) {
-            setFilteredProducts([]); // <-- empty if search text is empty
+            setFilteredProducts([]);
+            setCurrentView("home");
         } else {
             const filtered = products.filter((p) =>
                 p.name.toLowerCase().includes(searchText.toLowerCase())
             );
             setFilteredProducts(filtered);
+            setCurrentView("search");
         }
     }, [searchText, products]);
-    
+
     //------------Toast message Showing---------------//
 
 
@@ -86,14 +109,14 @@ export default function GlobalContext({ children }) {
         return () => unsubscribe();
     }, []);
 
-    useEffect(()=>{
-        console.log(products)
-    },[products])
+    useEffect(() => {
+        console.log(comment)
+    }, [comment])
 
     const [isSignInOpen, setIsSignIn] = useState(false); //-------------user signup field-----------//
     const [action, setAction] = useState('login') //----------Signup/login state----------------//
     return (
-        <GlobalApi.Provider value={{ isSignInOpen, searchText,toast, setToast,showToast, setSearchText, products, currentView,filteredProducts, setCurrentView, setProducts, setIsSignIn, wishlistProducts, wishlistIds, action, setAction, cartItems, setCartItems, likes, setLikes }}>
+        <GlobalApi.Provider value={{ isSignInOpen, searchText, toast, comment,currentUserInfo, setComment, setToast, selectedProductG, setSelectedProductG, showToast, setSearchText, products, currentView, filteredProducts, setCurrentView, setProducts, setIsSignIn, wishlistProducts, wishlistIds, action, setAction, cartItems, setCartItems, likes, setLikes }}>
             {children}
         </GlobalApi.Provider>
     );

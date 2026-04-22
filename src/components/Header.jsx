@@ -1,18 +1,49 @@
 import { AnimatePresence, motion as Motion } from "framer-motion";
 import { Search, Home, Shirt, Laptop, Briefcase, Footprints, ShoppingBasket, HeartPulse, LogOut, Gem, ShoppingBag, MapPin, Heart, ShoppingCart, User, ChevronDown, LayoutGrid, Headphones, Menu, X, Eye, EyeOff } from "lucide-react";
 import useHeaderHooks from "../hooks/useHeaderHooks";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../../service/firebaseConfig";
+import { AuthContext } from "../context/Authprovider";
+import { div } from "framer-motion/client";
 
 const Header = ({ setView, currentView, user }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [userMenu, setUserMenu] = useState(false);
+  const [order,setorder]=useState(0);
+  const [wish,setwish]=useState(0);
+  const [cart,setcart]=useState(0);
+  
+
   const {
     isMenuOpen, setIsMenuOpen, isCategoryOpen, setIsCategoryOpen, isSignInOpen, setIsSignIn, action, setAction,
     toast, setToast, name, setName, password, setPassword, cpassword, setCPassword, email, setEmail, showToast,
     handleSignup, handleNavClick, cartItems, wishlistProducts, wishlistIds, handleLogin, navLinks, searchText, setSearchText,
-    setWishlistProducts,setCartItems,setWishlistIds,setLikes
+    setWishlistProducts, setCartItems, setWishlistIds, setLikes,currentUserInfo, setCurrentUserInfo
   } = useHeaderHooks(setView)
+
+  useEffect(() => {
+  if (!userMenu) return;
+
+  const animate = (setter, target) => {
+    let start = 0;
+    const step = Math.ceil(target / 1000); 
+    const interval = setInterval(() => {
+      start += step;
+      if (start >= target) {
+        start = target;
+        clearInterval(interval);
+      }
+
+      setter(start);
+    },1000);
+  };
+
+  animate(setcart, currentUserInfo.cart);
+  animate(setorder, currentUserInfo.order);
+  animate(setwish, currentUserInfo.wishlist);
+
+}, [userMenu, currentUserInfo]);
 
   const navLinks1 = [
     { name: "Home", view: "home", icon: Home },
@@ -35,18 +66,21 @@ const Header = ({ setView, currentView, user }) => {
     try {
       await signOut(auth);
       showToast("Logged out successfully", "success");
-      setView("home");     
-      setIsSignIn(false);  
-      setIsCategoryOpen(false);
-      setWishlistIds([])
-      setLikes([])
-      setCartItems([])
-      setWishlistProducts([]);
     } catch (error) {
       console.log(error);
       showToast("Logout failed");
+      return;
     }
+
+    setView("home");
+    setIsSignIn(false);
+    setIsCategoryOpen(false);
+    setWishlistIds([]);
+    setLikes([]);
+    setCartItems([]);
+    setWishlistProducts([]);
   };
+
 
   return (
     <header className="w-full border-b border-gray-100 bg-white sticky top-0 z-50 font-[poppins]">
@@ -134,17 +168,25 @@ const Header = ({ setView, currentView, user }) => {
               </span>
             </div>
 
-            <button className="hidden sm:flex items-center gap-2 bg-[black] text-white px-5 py-2 rounded-md hover:bg-gray-700 transition-colors font-semibold font-[poppins] text-sm"
-              onClick={() => {
-                if (!user) {
-                  setIsSignIn(true)
-                } else {
-                  undefined
-                }
-              }}
-            >
-              <User className="w-4 h-4" /> {user ? 'Logged in' : 'Sign up'}
-            </button>
+            {
+              user ? (
+                <div className="h-9 w-9 rounded-full border flex items-center justify-center" onClick={() => setUserMenu(true)}>
+                  <User />
+                </div>
+              ) : (
+                <button className="hidden sm:flex items-center gap-2 bg-[black] text-white px-5 py-2 rounded-md hover:bg-gray-700 transition-colors font-semibold font-[poppins] text-sm"
+                  onClick={() => {
+                    if (!user) {
+                      setIsSignIn(true)
+                    } else {
+                      undefined
+                    }
+                  }}
+                >
+                  <User className="w-4 h-4" /> {user ? 'Logged in' : 'Sign up'}
+                </button>
+              )
+            }
 
             <button
               className="lg:hidden text-gray-700"
@@ -241,7 +283,7 @@ const Header = ({ setView, currentView, user }) => {
               {/*-------------------------------------------Header ------------------------------------------*/}
 
               <div className="flex items-center justify-center mb-3 px-2">
-                <h2 className="text-2xl lg:text-3xl font-semibold font-[poppins] px-2">
+                <h2 className="text-2xl lg:text-2xl font-semibold font-[poppins] px-2">
                   Menu
                 </h2>
               </div>
@@ -255,7 +297,7 @@ const Header = ({ setView, currentView, user }) => {
                     return (
                       <div onClick={() => { setView(item.view); setIsCategoryOpen(false) }} className={currentView === item.view ? 'bg-black cursor-pointer py-2 px-2 rounded-lg flex flex-row gap-2 items-center' : 'bg-white cursor-pointer py-2 px-2 flex flex-row gap-2 items-center'}>
                         <Icon size={20} className={currentView === item.view ? 'text-white' : 'text-black'} />
-                        <h1 className={currentView === item.view ? "text-white font-[poppins] text-[17px] font-medium" : "font-medium font-[poppins] text-[17px]"}>{item.name}</h1>
+                        <h1 className={currentView === item.view ? "text-white font-[poppins] text-[15px] font-medium" : "font-medium font-[poppins] text-[15px]"}>{item.name}</h1>
                       </div>
                     )
                   })
@@ -264,7 +306,7 @@ const Header = ({ setView, currentView, user }) => {
 
               <div className="flex flex-col mt-6 px-2">
                 <div className="w-full flex items-center justify-center">
-                  <h2 className="text-2xl lg:text-3xl font-semibold font-[poppins] px-2 pb-3">
+                  <h2 className="text-2xl lg:text-2xl font-semibold font-[poppins] px-2 pb-3">
                     Section
                   </h2>
                 </div>
@@ -275,16 +317,27 @@ const Header = ({ setView, currentView, user }) => {
                       return (
                         <div onClick={() => {
                           if (item.view === "") {
-                            handleLogout();
-                            setIsCategoryOpen(false)
+                            if (user) {
+                              handleLogout();
+                              setIsCategoryOpen(false)
+                            }
+                            else {
+                              setIsCategoryOpen(false)
+                            }
                           }
                           else {
-                            handleNavClick(item.view);
-                            setIsCategoryOpen(false)
+                            if (user) {
+                              handleNavClick(item.view);
+                              setIsCategoryOpen(false)
+                            }
+                            else {
+                              setIsCategoryOpen(false)
+                              setIsSignIn(true)
+                            }
                           }
                         }} className={currentView === item.view ? 'bg-black cursor-pointer py-2 px-2 rounded-md flex flex-row items-center gap-2' : 'bg-white cursor-pointer py-2 px-2 flex flex-row items-center gap-2'}>
                           <Icon size={20} className={currentView === item.view ? 'text-white' : 'text-black'} />
-                          <h1 className={currentView === item.view ? "text-white font-[poppins] text-[17px] font-medium" : "font-[poppins] text-black text-[17px] font-medium"}>{item.name}</h1>
+                          <h1 className={currentView === item.view ? "text-white font-[poppins] text-[15px] font-medium" : "font-[poppins] text-black text-[15px] font-medium"}>{item.name}</h1>
                         </div>
                       )
                     })
@@ -319,7 +372,7 @@ const Header = ({ setView, currentView, user }) => {
               animate={{ x: 0 }}
               exit={{ x: 500 }}
               transition={{ duration: 1, ease: "easeInOut" }}
-              className="fixed top-0 right-0 h-full w-125 bg-white shadow-xl z-50 px-2 py-4 hidden lg:block"
+              className="fixed top-0 right-0 h-full w-105 bg-white shadow-xl z-50 px-2 py-4 hidden lg:block"
             >
               {/*------------------------------------------Header ---------------------------------------*/}
 
@@ -439,9 +492,8 @@ const Header = ({ setView, currentView, user }) => {
 
                 </form>
               </div>
-              {/* ----------------------- Toast Message ------------------------ */}
-
-              <AnimatePresence>
+              {/* ----------------------- Toast Message ------------------------ 
+                <AnimatePresence>
                 {toast.show && (
                   <Motion.div
                     initial={{ y: 100, opacity: 0 }}
@@ -455,130 +507,214 @@ const Header = ({ setView, currentView, user }) => {
                   </Motion.div>
                 )}
               </AnimatePresence>
+              */}
             </Motion.div>
           </>
         )}
       </AnimatePresence>
-       {/* -------------------- Mobile SignUp Modal -------------------- */}
-              <AnimatePresence>
-                {isSignInOpen && (
-                  <>
-                    {/*--------------------------Overlay-----------------------------*/}
-                    <Motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={() => setIsSignIn(false)}
-                      className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+      {/* -------------------- Mobile SignUp Modal -------------------- */}
+      <AnimatePresence>
+        {isSignInOpen && (
+          <>
+            {/*--------------------------Overlay-----------------------------*/}
+            <Motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSignIn(false)}
+              className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+            />
+
+            {/*----------------------------Centered Modal-------------------------*/}
+            <Motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 z-50 flex items-center justify-center lg:hidden"
+            >
+              <div className="w-[90%] max-w-sm bg-white rounded-xl shadow-sm py-10 px-4 relative">
+
+                {/*---------------------------Close Button-----------------------------*/}
+                <button
+                  onClick={() => setIsSignIn(false)}
+                  className="absolute top-3 right-3 text-gray-500"
+                >
+                  <X size={20} />
+                </button>
+
+                {/*--------------------------------Tabs-----------------------------------*/}
+                <div className="w-full bg-gray-100 flex justify-between h-10 rounded-full mb-6">
+                  <button
+                    className={action === 'login'
+                      ? "w-1/2 bg-black text-white rounded-full"
+                      : "w-1/2"}
+                    onClick={() => setAction('login')}
+                  >
+                    Login
+                  </button>
+                  <button
+                    className={action === 'signup'
+                      ? "w-1/2 bg-black text-white rounded-full"
+                      : "w-1/2"}
+                    onClick={() => setAction('signup')}
+                  >
+                    Register
+                  </button>
+                </div>
+
+                {/*-----------------------------------Form------------------------------*/}
+                <form className="flex flex-col gap-3">
+
+                  {action === 'signup' && (
+                    <input
+                      type="text"
+                      placeholder="Full Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="border px-3 py-2 rounded-md border-gray-300"
                     />
+                  )}
 
-                    {/*----------------------------Centered Modal-------------------------*/}
-                    <Motion.div
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.8, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="fixed inset-0 z-50 flex items-center justify-center lg:hidden"
+                  <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="border px-3 py-2 rounded-md border-gray-300"
+                  />
+
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="border px-3 py-2 rounded-md w-full pr-10 border-gray-300"
+                    />
+                    <span
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-2 cursor-pointer"
                     >
-                      <div className="w-[90%] max-w-sm bg-white rounded-xl shadow-sm py-10 px-4 relative">
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </span>
+                  </div>
 
-                        {/*---------------------------Close Button-----------------------------*/}
-                        <button
-                          onClick={() => setIsSignIn(false)}
-                          className="absolute top-3 right-3 text-gray-500"
-                        >
-                          <X size={20} />
-                        </button>
+                  {action === 'signup' && (
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Confirm Password"
+                      value={cpassword}
+                      onChange={(e) => setCPassword(e.target.value)}
+                      className="border px-3 py-2 rounded-md border-gray-300"
+                    />
+                  )}
 
-                        {/*--------------------------------Tabs-----------------------------------*/}
-                        <div className="w-full bg-gray-100 flex justify-between h-10 rounded-full mb-6">
-                          <button
-                            className={action === 'login'
-                              ? "w-1/2 bg-black text-white rounded-full"
-                              : "w-1/2"}
-                            onClick={() => setAction('login')}
-                          >
-                            Login
-                          </button>
-                          <button
-                            className={action === 'signup'
-                              ? "w-1/2 bg-black text-white rounded-full"
-                              : "w-1/2"}
-                            onClick={() => setAction('signup')}
-                          >
-                            Register
-                          </button>
-                        </div>
+                  <button
+                    type="button"
+                    className="bg-black text-white py-2 rounded-md mt-2"
+                    onClick={() => {
+                      if (action === 'login') {
+                        handleLogin();
+                        setIsSignIn(false);
+                      } else {
+                        handleSignup();
+                        setIsSignIn(false);
+                      }
+                    }}
+                  >
+                    {action === 'login' ? 'Log in' : 'Sign up'}
+                  </button>
 
-                        {/*-----------------------------------Form------------------------------*/}
-                        <form className="flex flex-col gap-3">
+                </form>
+              </div>
 
-                          {action === 'signup' && (
-                            <input
-                              type="text"
-                              placeholder="Full Name"
-                              value={name}
-                              onChange={(e) => setName(e.target.value)}
-                              className="border px-3 py-2 rounded-md border-gray-300"
-                            />
-                          )}
+            </Motion.div>
+          </>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {toast.show && (
+          <Motion.div
+            initial={{ opacity: 0, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className={`
+                       fixed left-1/2 transform -translate-x-1/2 
+                       bottom-4 w-[90%] text-center
+                       lg:left-1/2 lg:bottom-0 lg:-translate-x-1/2 lg:w-full
+                       border-gray-200
+                       text-[16px] lg:text-[15px] font-semibold
+                       px-5 py-4 lg:px-20 lg:py-3
+                       rounded-lg shadow-2xl shadow-[black]/30 z-[999]
+     
+                       ${toast.type === "success" ? "bg-green-100 text-black" : "bg-red-100 text-black"}
+           `}
+          >
+            {toast.message}
+          </Motion.div>
+        )}
+      </AnimatePresence>
 
-                          <input
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="border px-3 py-2 rounded-md border-gray-300"
-                          />
+      {/*--------------------------User Account --------------------------*/}
 
-                          <div className="relative">
-                            <input
-                              type={showPassword ? "text" : "password"}
-                              placeholder="Password"
-                              value={password}
-                              onChange={(e) => setPassword(e.target.value)}
-                              className="border px-3 py-2 rounded-md w-full pr-10 border-gray-300"
-                            />
-                            <span
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-2 cursor-pointer"
-                            >
-                              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                            </span>
-                          </div>
+      <AnimatePresence>
+        {userMenu && (
+          <>
+            {/*-------------------------------------- Overlay---------------------------------------- */}
+            <div
+              onClick={() => setUserMenu(false)}
+              className="fixed inset-0 bg-black/40 z-40"
+            />
 
-                          {action === 'signup' && (
-                            <input
-                              type={showPassword ? "text" : "password"}
-                              placeholder="Confirm Password"
-                              value={cpassword}
-                              onChange={(e) => setCPassword(e.target.value)}
-                              className="border px-3 py-2 rounded-md border-gray-300"
-                            />
-                          )}
+            {/*-------------------------------------------------Side Drawer --------------------------------------------*/}
 
-                          <button
-                            type="button"
-                            className="bg-black text-white py-2 rounded-md mt-2"
-                            onClick={() => {
-                              if (action === 'login') {
-                                handleLogin();
-                                setIsSignIn(false); 
-                              } else {
-                                handleSignup();
-                                setIsSignIn(false);
-                              }
-                            }}
-                          >
-                            {action === 'login' ? 'Log in' : 'Sign up'}
-                          </button>
-
-                        </form>
-                      </div>
-                    </Motion.div>
-                  </>
-                )}
-              </AnimatePresence>
+            <Motion.div
+              initial={{ x: 400 }}
+              animate={{ x: 0 }}
+              exit={{ x: 400 }}
+              transition={{ duration: 0.5 }}
+              className="fixed top-0 right-0 h-full w-[250px] lg:w-[350px] bg-white shadow-xl z-50 px-2 py-4"
+            >
+              {/*-------------------------------------------Header ------------------------------------------*/}
+            <div className="px-5">
+                 <div className="flex gap-3 items-center">
+                  <div className="h-12 w-12 border rounded-full border-gray-300 flex items-center justify-center">
+                    <User/>
+                  </div>
+                  <div>
+                   <h2 className="font-semibold text-[16px]">{currentUserInfo.name}</h2>
+                   <h2 className="font-semibold text-[13px] opacity-55">{currentUserInfo.email.slice(0,4)}*****{currentUserInfo.email.slice(currentUserInfo.email.length-12,currentUserInfo.email.length)}</h2>
+                  </div>
+                 </div>
+                 <div className="flex justify-between">
+                  <div className="w-[30%] py-5 rounded-lg bg-white shadow-md flex flex-col items-center justify-center">
+                    <h2 className="text-[15px]">Cart</h2>
+                    <h2 className="text-[22px] font-bold">{cart}</h2>
+                  </div>
+                  <div className="w-[30%] py-5 rounded-lg bg-white shadow-md flex flex-col items-center justify-center">
+                    <h2 className="text-[15px]">Order</h2>
+                    <h2 className="text-[22px] font-bold">{order}</h2>
+                  </div>
+                  <div className="w-[30%] py-5 rounded-lg bg-white shadow-md flex flex-col items-center justify-center">
+                    <h2 className="text-[15px]">Wishlist</h2>
+                    <h2 className="text-[22px] font-bold">{wish}</h2>
+                  </div>
+                 </div>
+                  <button className="bg-black w-full mt-10 text-white py-2 rounded-lg"
+                  onClick={()=>{
+                    handleLogout();
+                    setUserMenu(false)
+                  }}
+                  >
+                    Log out
+                  </button>
+            </div>
+            </Motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

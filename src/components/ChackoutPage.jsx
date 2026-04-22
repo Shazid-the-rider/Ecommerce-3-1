@@ -6,14 +6,16 @@ import { db } from '../../service/firebaseConfig';
 import { AuthContext } from '../context/Authprovider';
 import { remove_Cart_Of_user } from '../../service/firebaseCrudOperation';
 import useCheckOutHooks from '../hooks/useCheckOutHooks';
+import { AnimatePresence,motion  } from 'framer-motion';
 
 
 const CheckoutPage = ({ setView }) => {
 
   const { user, cartItems, setCartItems, firstName, setFirstName, lastName, setLastName, address, setAddress, city, setCity, zipCode, setZipCode,
-    email, setEmail, subtotals, shipping, tax, total, handlePlaceOrder, } = useCheckOutHooks(setView);
+    email, setEmail, subtotals, shipping, tax, total, handlePlaceOrder,toast } = useCheckOutHooks(setView);
   return (
-    <div className="container mx-auto px-4 py-12 font-[poppins]">
+  
+    <div className="container mx-auto px-4 py-12 font-[poppins] relative">
       <button onClick={() => setView('cart')} className="flex items-center gap-2 text-gray-600 font-semibold mb-8 hover:text-[black]">
         <ArrowLeft size={18} /> Back to Cart
       </button>
@@ -31,19 +33,19 @@ const CheckoutPage = ({ setView }) => {
               <Truck className="text-[black]" /> Shipping Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <input required type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name" className="w-full bg-gray-100 px-6 py-4 rounded-md outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all" />
-              <input required type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name" className="w-full bg-gray-100 px-6 py-4 rounded-md outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all" />
-              <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email Address"  className="w-full bg-gray-100 px-6 py-4 rounded-md md:col-span-2 outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all"/>
-              <input required type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Street Address" className="w-full bg-gray-100 px-6 py-4 rounded-md md:col-span-2 outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all"/>
-              <input required type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" className="w-full bg-gray-100 px-6 py-4 rounded-md outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all" />
-              <input required type="text" value={zipCode} onChange={(e) => setZipCode(e.target.value)} placeholder="ZIP Code" className="w-full bg-gray-100 px-6 py-4 rounded-md outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all"/>
+              <input required type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="First Name" className="w-full bg-gray-100 px-6 py-2 lg:py-4 rounded-md outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all" />
+              <input required type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Last Name" className="w-full bg-gray-100 px-6 py-2 lg:py-4 rounded-md outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all" />
+              <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email Address"  className="w-full bg-gray-100 px-6 py-2 lg:py-4 rounded-md md:col-span-2 outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all"/>
+              <input required type="text" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Street Address" className="w-full bg-gray-100 px-6 py-2 lg:py-4 rounded-md md:col-span-2 outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all"/>
+              <input required type="text" value={city} onChange={(e) => setCity(e.target.value)} placeholder="City" className="w-full bg-gray-100 px-6 py-2 lg:py-4 rounded-md outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all" />
+              <input required type="text" value={zipCode} onChange={(e) => setZipCode(e.target.value)} placeholder="ZIP Code" className="w-full bg-gray-100 px-6 py-2 lg:py-4 rounded-md outline-none focus:ring-2 ring-[black]/20 border border-transparent focus:border-[black] transition-all"/>
             </div>
           </div>
 
           {/*------------------------------------Payment Method------------------------------*/}
 
           <div className="bg-white p-8 md:p-10 rounded-[40px] shadow-sm border border-gray-100">
-            <h3 className="text-2xl font-bold text-[#253D4E] mb-8 flex items-center gap-3">
+            <h3 className="text-xl lg:text-2xl font-bold text-[#253D4E] mb-8 flex items-center gap-3">
               <CreditCard className="text-[black]" /> Payment Method
             </h3>
             <div className="space-y-4">
@@ -107,7 +109,7 @@ const CheckoutPage = ({ setView }) => {
             <button
               onClick={() => handlePlaceOrder()}
               type="button"
-              className="w-full bg-black text-white py-3 rounded-xl font-semibold text-xl hover:bg-[#253D4E] transition-all flex items-center justify-center gap-3 shadow-xl shadow-green-100"
+              className="w-full bg-black text-white py-2 lg:py-3 rounded-lg lg:rounded-xl font-semibold text-lg lg:text-xl hover:bg-[#253D4E] transition-all flex items-center justify-center gap-3 shadow-xl shadow-green-100"
             >
               Place Order Now
             </button>
@@ -120,7 +122,33 @@ const CheckoutPage = ({ setView }) => {
         </div>
 
       </form>
+      <AnimatePresence>
+            {toast.show && (
+              <motion.div
+                initial={{ opacity: 0, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className={`
+                       fixed left-1/2 transform -translate-x-1/2 
+                       bottom-4 w-[90%] text-center
+                       lg:left-1/2 lg:bottom-0 lg:-translate-x-1/2 lg:w-full
+                       border-gray-200
+                       text-[16px] lg:text-[15px] font-semibold
+                       px-5 py-4 lg:px-20 lg:py-3
+                       rounded-lg shadow-2xl shadow-[black]/30 z-[999]
+     
+                       ${toast.type === "success" ? "bg-green-100 text-black" : "bg-red-100 text-black"}
+           `}
+              >
+                {toast.message}
+              </motion.div>
+            )}
+          </AnimatePresence>
+       
     </div>
+    
+   
   );
 };
 

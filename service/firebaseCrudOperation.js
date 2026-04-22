@@ -1,4 +1,4 @@
-import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, increment, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore"
+import { addDoc, arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, getDocs, increment, onSnapshot, orderBy, query, serverTimestamp, setDoc, updateDoc, where } from "firebase/firestore"
 import { db } from "./firebaseConfig"
 
 //-----------product added to cart------------------
@@ -43,7 +43,7 @@ export const remove_Cart_Of_user = async (userId) => {
         );
         await Promise.all(deletePromises);
         const userRef = doc(db, "USERS", userId);
-        await updateDoc(userRef, { cart: 0 });
+        await updateDoc(userRef, { cart: increment(-1) });
         console.log("All cart items removed for user");
     } catch (error) {
         console.error("Error clearing cart:", error);
@@ -53,8 +53,10 @@ export const remove_Cart_Of_user = async (userId) => {
 //-------------------Check out whether the product is already in wishList or not-----------------//
 
 
-export const add_to_wishlist = async (productid, uid,showToast) => {
+export const add_to_wishlist = async (productid, uid, showToast) => {
     const wishlistRef = doc(db, "WISHLIST", productid.toString());
+    const userRef = doc(db, "USERS", uid);
+
     try {
         const docSnap = await getDoc(wishlistRef);
         if (docSnap.exists()) {
@@ -63,17 +65,20 @@ export const add_to_wishlist = async (productid, uid,showToast) => {
                 await updateDoc(wishlistRef, {
                     likes: arrayRemove(uid),
                 });
+                await updateDoc(userRef, { wishlist: increment(-1) });
             } else {
                 await updateDoc(wishlistRef, {
                     likes: arrayUnion(uid),
                 });
-                showToast('Successfully Added to Wishlist ✅','success')
+                await updateDoc(userRef, { wishlist: increment(1) });
+                showToast('Successfully Added to Wishlist ✅', 'success')
             }
         } else {
             await setDoc(wishlistRef, {
                 likes: [uid],
             });
-            showToast('Successfully Added to Wishlist ✅','success')
+            await updateDoc(userRef, { wishlist: increment(1) });
+            showToast('Successfully Added to Wishlist ✅', 'success')
         }
     } catch (error) {
         console.error("Wishlist error:", error);
@@ -135,12 +140,58 @@ export const fetch_products = (setProducts) => {
 
 //---------------------Delete Cart-----------------------------//
 
-export const deleteCart = async (id) => {
+export const deleteCart = async (id, userId) => {
     try {
         const cartRef = doc(db, "CART", id);
         await deleteDoc(cartRef);
+        const userRef = doc(db, "USERS", userId);
+        await updateDoc(userRef, { cart: increment(-1) });
         console.log("Cart deleted successfully!");
     } catch (error) {
         console.error("Error deleting cart:", error);
+    }
+};
+
+//---------------------Real Time Comment-----------------------//
+
+export const Fetch_Comment = (setComments, productid) => {
+    const q = query(collection(db, "COMMENT"), where("id", "==", productid), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const comments = snapshot.docs.map(doc => ({
+            ...doc.data()
+        }));
+        setComments(comments)
+    });
+    return unsubscribe;
+}
+
+//-------------------Listen and Fetch Current userInfo-------------//
+
+export const listen_Current_User = (uid, setCurrentUserInfo) => {
+    const ref = doc(db, "USERS", uid);
+    const unsubscribe = onSnapshot(ref, (docSnap) => {
+        if (docSnap.exists()) {
+            setCurrentUserInfo(docSnap.data());
+        } else {
+            setUserInfo(null);
+        }
+    });
+    return unsubscribe;
+};
+
+//-----------------Add comment-------------------//
+
+export const add_Comment = async (productId, text, currentuser) => {
+    try {
+        await addDoc(collection(db, "COMMENT"), {
+            id: productId,
+            comment: text,
+            userId: currentuser.id,
+            name: currentuser.name,
+            email: currentuser.email,
+            createdAt: serverTimestamp()
+        });
+    } catch (error) {
+        console.error("Error adding comment:", error);
     }
 };

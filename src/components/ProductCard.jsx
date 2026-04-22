@@ -5,11 +5,11 @@ import { add_To_Cart, add_to_wishlist } from "../../service/firebaseCrudOperatio
 import { AuthContext } from "../context/Authprovider";
 import { useProductCardHooks } from "../hooks/useProductCardHooks";
 
-const ProductCard = ({ product, handleProductClick, }) => {
+const ProductCard = ({ product, handleProductClick}) => {
   const { toast, setToast, showToast } = useContext(GlobalApi);
   const { wishlistProducts, cartItems, user, isInCart, discount, isInWishlist, setIsSignIn } = useProductCardHooks(product);
   return (
-    <div className="group bg-white border border-gray-300 lg:border-gray-100 rounded-2xl p-4 transition-all duration-300 hover:border-gray-500 hover:shadow-[0_10px_30px_rgba(0,0,0,0.05)] relative flex flex-col h-full">
+    <div className="group bg-white border cursor-pointer border-gray-300 lg:border-gray-100 rounded-2xl p-4 transition-all duration-300 hover:border-gray-500 hover:shadow-[0_10px_30px_rgba(0,0,0,0.05)] relative flex flex-col h-full">
 
       {/*------------------------------- Left Badge (Hot, Sale, New)-------------------------- */}
 
