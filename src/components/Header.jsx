@@ -6,44 +6,45 @@ import { signOut } from "firebase/auth";
 import { auth } from "../../service/firebaseConfig";
 import { AuthContext } from "../context/Authprovider";
 import { div } from "framer-motion/client";
+import { Cancel_Order } from "../../service/firebaseCrudOperation";
 
 const Header = ({ setView, currentView, user }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [userMenu, setUserMenu] = useState(false);
-  const [order,setorder]=useState(0);
-  const [wish,setwish]=useState(0);
-  const [cart,setcart]=useState(0);
-  
+  const [order, setorder] = useState(0);
+  const [wish, setwish] = useState(0);
+  const [cart, setcart] = useState(0);
+
 
   const {
-    isMenuOpen, setIsMenuOpen, isCategoryOpen, setIsCategoryOpen, isSignInOpen, setIsSignIn, action, setAction,
-    toast, setToast, name, setName, password, setPassword, cpassword, setCPassword, email, setEmail, showToast,
+    isMenuOpen, setIsMenuOpen, userType, setUserType, isCategoryOpen, setIsCategoryOpen, isSignInOpen, setIsSignIn, action, setAction, fetchOrder,
+    toast, setToast, name, setName, password, setPassword, cpassword, setCPassword, email, setEmail, showToast, adminSignIn, setAdminSignIn,
     handleSignup, handleNavClick, cartItems, wishlistProducts, wishlistIds, handleLogin, navLinks, searchText, setSearchText,
-    setWishlistProducts, setCartItems, setWishlistIds, setLikes,currentUserInfo, setCurrentUserInfo
+    setWishlistProducts, setCartItems, setWishlistIds, setLikes, currentUserInfo, setCurrentUserInfo, location, setLocation
   } = useHeaderHooks(setView)
 
   useEffect(() => {
-  if (!userMenu) return;
+    if (!userMenu) return;
 
-  const animate = (setter, target) => {
-    let start = 0;
-    const step = Math.ceil(target / 1000); 
-    const interval = setInterval(() => {
-      start += step;
-      if (start >= target) {
-        start = target;
-        clearInterval(interval);
-      }
+    const animate = (setter, target) => {
+      let start = 0;
+      const step = Math.ceil(target / 1000);
+      const interval = setInterval(() => {
+        start += step;
+        if (start >= target) {
+          start = target;
+          clearInterval(interval);
+        }
 
-      setter(start);
-    },1000);
-  };
+        setter(start);
+      }, 1000);
+    };
 
-  animate(setcart, currentUserInfo.cart);
-  animate(setorder, currentUserInfo.order);
-  animate(setwish, currentUserInfo.wishlist);
+    animate(setcart, currentUserInfo.cart);
+    animate(setorder, currentUserInfo.order);
+    animate(setwish, currentUserInfo.wishlist);
 
-}, [userMenu, currentUserInfo]);
+  }, [userMenu, currentUserInfo]);
 
   const navLinks1 = [
     { name: "Home", view: "home", icon: Home },
@@ -127,7 +128,7 @@ const Header = ({ setView, currentView, user }) => {
           <div className="hidden xl:flex items-center gap-2 border border-gray-200 shadow-sm rounded-md px-3 py-2 cursor-pointer">
             <MapPin className="text-gray-700 w-4 h-4" />
             <span className="text-[black] text-sm font-medium font-[poppins]">
-              Your Location
+              {location}
             </span>
             <ChevronDown className="text-gray-700 w-4 h-4" />
           </div>
@@ -479,9 +480,11 @@ const Header = ({ setView, currentView, user }) => {
                     className="mt-4 bg-black text-white h-10 rounded-md font-semibold hover:bg-gray-800 transition"
                     onClick={() => {
                       if (action === 'login') {
+                        setUserType('any');
                         handleLogin()
                         setIsSignIn(true)
                       } else {
+                        setUserType('any')
                         handleSignup();
                         setIsSignIn(true)
                       }
@@ -678,17 +681,17 @@ const Header = ({ setView, currentView, user }) => {
               className="fixed top-0 right-0 h-full w-[250px] lg:w-[350px] bg-white shadow-xl z-50 px-2 py-4"
             >
               {/*-------------------------------------------Header ------------------------------------------*/}
-            <div className="px-5">
-                 <div className="flex gap-3 items-center">
+              <div className="px-5">
+                <div className="flex gap-3 items-center">
                   <div className="h-12 w-12 border rounded-full border-gray-300 flex items-center justify-center">
-                    <User/>
+                    <User />
                   </div>
                   <div>
-                   <h2 className="font-semibold text-[16px]">{currentUserInfo.name}</h2>
-                   <h2 className="font-semibold text-[13px] opacity-55">{currentUserInfo.email.slice(0,4)}*****{currentUserInfo.email.slice(currentUserInfo.email.length-12,currentUserInfo.email.length)}</h2>
+                    <h2 className="font-semibold text-[16px]">{currentUserInfo.name}</h2>
+                    <h2 className="font-semibold text-[13px] opacity-55">{currentUserInfo.email.slice(0, 4)}*****{currentUserInfo.email.slice(currentUserInfo.email.length - 12, currentUserInfo.email.length)}</h2>
                   </div>
-                 </div>
-                 <div className="flex justify-between">
+                </div>
+                <div className="flex justify-between mt-5">
                   <div className="w-[30%] py-5 rounded-lg bg-white shadow-md flex flex-col items-center justify-center">
                     <h2 className="text-[15px]">Cart</h2>
                     <h2 className="text-[22px] font-bold">{cart}</h2>
@@ -701,16 +704,57 @@ const Header = ({ setView, currentView, user }) => {
                     <h2 className="text-[15px]">Wishlist</h2>
                     <h2 className="text-[22px] font-bold">{wish}</h2>
                   </div>
-                 </div>
-                  <button className="bg-black w-full mt-10 text-white py-2 rounded-lg"
-                  onClick={()=>{
+                </div>
+                {
+                  (!fetchOrder || fetchOrder.length === 0) && (
+                    <div className="h-20 w-full flex justify-center items-center">
+                      <p className="text-[15px] font-semibold">No order placed</p>
+                    </div>
+                  )
+                }
+                {
+                  fetchOrder.length > 0 && (
+                    <div className="mt-5 h-95 overflow-y-auto pr-1">
+                      {
+                        fetchOrder.map((item, index) => {
+                          return (
+                            <div>
+                              {
+                                item.items.map((itm, i) => {
+                                  return (
+                                    <div className="flex h-auto py-8 w-full gap-2 bg-gray-50 mb-2 items-center px-4 rounded-xl relative">
+                                      <div className="w-15 h-15 flex items-center justify-center rounded-xl">
+                                        <img src={itm.image} className="object-cover h-15 w-15 bg-black rounded-lg" />
+                                      </div>
+                                      <div>
+                                        <p className="text-[15px] font-semibold">{itm.name}</p>
+                                        <p className="text-[15px] font-semibold">${itm.price}</p>
+                                      </div>
+                                      <div className="absolute bottom-0 right-2 bg-red-600 px-4 py-1 rounded-md" onClick={() => {
+                                        Cancel_Order(item.id, itm.pid, item.items, user.uid)
+                                      }}>
+                                        <p className="text-[13px] text-white font-semibold">Cancel</p>
+                                      </div>
+                                    </div>
+                                  )
+                                })
+                              }
+                            </div>
+                          )
+                        })
+                      }
+                    </div>
+                  )
+                }
+                <button className="bg-black w-full mt-10 text-white py-2 rounded-lg"
+                  onClick={() => {
                     handleLogout();
                     setUserMenu(false)
                   }}
-                  >
-                    Log out
-                  </button>
-            </div>
+                >
+                  Log out
+                </button>
+              </div>
             </Motion.div>
           </>
         )}

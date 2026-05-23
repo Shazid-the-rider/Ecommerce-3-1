@@ -43,7 +43,7 @@ export const remove_Cart_Of_user = async (userId) => {
         );
         await Promise.all(deletePromises);
         const userRef = doc(db, "USERS", userId);
-        await updateDoc(userRef, { cart: increment(-1) });
+        //await updateDoc(userRef, { cart: increment(-1) });
         console.log("All cart items removed for user");
     } catch (error) {
         console.error("Error clearing cart:", error);
@@ -195,3 +195,32 @@ export const add_Comment = async (productId, text, currentuser) => {
         console.error("Error adding comment:", error);
     }
 };
+
+//----------------Find order items for individual user ------------//
+
+export const Fetch_Order = (setFetchOrder, uid) => {
+    const q = query(collection(db, "ORDER"), where("user", "==", uid));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const orderItems = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data(), }));
+        setFetchOrder(orderItems);
+    });
+    return unsubscribe;
+}
+
+//---------------remove individual single order -------------------//
+
+export const Cancel_Order = async (orderDocId, productId, items,uid) => {
+    const orderRef = doc(db, "ORDER", orderDocId);
+    const updatedItems = items.filter(
+        (item) => item.pid !== productId
+    );
+    if(updatedItems.length===0){
+        await deleteDoc(orderRef);
+    }
+    else{
+    await updateDoc(orderRef, {items: updatedItems,});
+    const userRef =doc(db,'USERS',uid);
+    await updateDoc(userRef,{order:increment(-1)})
+    }
+   
+}

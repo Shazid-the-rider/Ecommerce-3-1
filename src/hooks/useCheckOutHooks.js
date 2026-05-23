@@ -46,11 +46,13 @@ export default function useCheckOutHooks(setView) {
             createdAt: serverTimestamp(),
             total: total,
             user: user.uid,
+            email:email
         }
         const orderRef = collection(db, 'ORDER');
         const placeRef = await addDoc(orderRef, info);
         const finalRef = doc(db, 'ORDER', placeRef.id);
         await updateDoc(userRef, { order: increment(cartItems.length) });
+        await updateDoc(userRef,{cart:increment(-cartItems.length)});
         await updateDoc(finalRef, { orderPlaceID: placeRef.id });
         showToast('Successfully Order Placed ✅', 'success')
 

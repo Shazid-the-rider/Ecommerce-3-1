@@ -106,11 +106,11 @@ const ProductCard = ({ product, handleProductClick}) => {
         <div className="mt-auto flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-2xl lg:text-xl font-bold text-green-500 lg:text-[black] font-[poppins]">
-              ${product.price.toFixed(2)}
+              ${Number(product.price).toFixed(2)}
             </span>
             {product.oldPrice && (
               <span className="text-md lg:text-xs line-through font-semibold text-[black] font-[poppins] opacity-60">
-                ${product.oldPrice.toFixed(2)}
+                ${Number(product.oldPrice).toFixed(2)}
               </span>
             )}
           </div>

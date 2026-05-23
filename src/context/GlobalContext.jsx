@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, } from "react";
 import { AuthContext } from "./Authprovider";
-import { Fetch_Comment, fetch_products, getWishlistProducts, listen_Current_User, listen_To_Cart, listen_User_Wishlist } from "../../service/firebaseCrudOperation";
+import { Fetch_Comment, Fetch_Order, fetch_products, getWishlistProducts, listen_Current_User, listen_To_Cart, listen_User_Wishlist } from "../../service/firebaseCrudOperation";
 
 export const GlobalApi = createContext();
 
@@ -23,6 +23,9 @@ export default function GlobalContext({ children }) {
     const [currentUserInfo, setCurrentUserInfo] = useState();
     const [searchText, setSearchText] = useState(""); //-----------------------------searching product ------------------//
     const [filteredProducts, setFilteredProducts] = useState([]); //----------------product filtering------------------//
+    const [fetchOrder,setFetchOrder]=useState([]); //-------------------------Fetch order-----------------------------//
+    const [userType,setUserType]= useState('any');
+    const [adminSignIn,setAdminSignIn]= useState(false);
 
     //------------Current User Info---------//
 
@@ -79,6 +82,10 @@ export default function GlobalContext({ children }) {
         return unsubscribe;
     }, [user])
 
+    useEffect(()=>{
+        console.log('orderplace',fetchOrder.length)
+    },[fetchOrder])
+
     //-----------WishList id-----------------------------//
 
     useEffect(() => {
@@ -97,10 +104,7 @@ export default function GlobalContext({ children }) {
         };
         if (wishlistIds.length) fetchData();
     }, [wishlistIds]);
-    useEffect(() => {
-        console.log(wishlistProducts.length);
-        console.log(wishlistProducts)
-    }, [wishlistIds])
+    
 
     //-----------------FETCH Products ---------------------//
 
@@ -109,14 +113,20 @@ export default function GlobalContext({ children }) {
         return () => unsubscribe();
     }, []);
 
-    useEffect(() => {
-        console.log(comment)
-    }, [comment])
+    useEffect(()=>{
+        if(!user){
+            return;
+        }
+        const unsubscribe= Fetch_Order(setFetchOrder,user.uid);
+        return ()=>unsubscribe()
+    },[user])
+
+    
 
     const [isSignInOpen, setIsSignIn] = useState(false); //-------------user signup field-----------//
     const [action, setAction] = useState('login') //----------Signup/login state----------------//
     return (
-        <GlobalApi.Provider value={{ isSignInOpen, searchText, toast, comment,currentUserInfo, setComment, setToast, selectedProductG, setSelectedProductG, showToast, setSearchText, products, currentView, filteredProducts, setCurrentView, setProducts, setIsSignIn, wishlistProducts, wishlistIds, action, setAction, cartItems, setCartItems, likes, setLikes }}>
+        <GlobalApi.Provider value={{ isSignInOpen, searchText,fetchOrder,userType,setUserType,adminSignIn,setAdminSignIn, toast, comment,currentUserInfo, setComment, setToast, selectedProductG, setSelectedProductG, showToast, setSearchText, products, currentView, filteredProducts, setCurrentView, setProducts, setIsSignIn, wishlistProducts, wishlistIds, action, setAction, cartItems, setCartItems, likes, setLikes }}>
             {children}
         </GlobalApi.Provider>
     );
